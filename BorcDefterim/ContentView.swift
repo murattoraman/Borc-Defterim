@@ -14,6 +14,7 @@ struct ContentView: View {
     
     @State private var selectedMonth = Date()
     @State private var showingAddDebt = false
+    @State private var debtToEdit: Debt?
     
     // Seçili aya göre filtrelenmiş borçlar
     private var filteredDebts: [Debt] {
@@ -60,6 +61,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Borç Yönetimi")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -71,6 +73,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAddDebt) {
                 AddDebtView(selectedMonth: selectedMonth)
+            }
+            .sheet(item: $debtToEdit) { debt in
+                AddDebtView(debt: debt, selectedMonth: selectedMonth)
             }
         }
     }
@@ -158,12 +163,24 @@ struct ContentView: View {
                 DebtRowView(debt: debt) {
                     toggleDebtPaid(debt)
                 }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    debtToEdit = debt
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
                         deleteDebt(debt)
                     } label: {
                         Label("Sil", systemImage: "trash")
                     }
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    Button {
+                        debtToEdit = debt
+                    } label: {
+                        Label("Düzenle", systemImage: "pencil")
+                    }
+                    .tint(.blue)
                 }
             }
         }
